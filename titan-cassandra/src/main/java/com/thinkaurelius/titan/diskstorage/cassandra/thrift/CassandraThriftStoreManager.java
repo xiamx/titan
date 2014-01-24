@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,7 +56,6 @@ import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KCVMutation;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
 import com.thinkaurelius.titan.diskstorage.util.ByteBufferUtil;
 import com.thinkaurelius.titan.diskstorage.util.Hex;
-import com.thinkaurelius.titan.diskstorage.util.TimestampProvider;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 /**
@@ -152,7 +150,7 @@ public class CassandraThriftStoreManager extends AbstractCassandraStoreManager {
 
         final Timestamp timestamp = getTimestamp(txh);
 
-        ConsistencyLevel consistency = getTx(txh).getWriteConsistencyLevel().getThriftConsistency();
+        ConsistencyLevel consistency = getTx(txh).getWriteConsistencyLevel().getThrift();
 
         // Generate Thrift-compatible batch_mutate() datastructure
         // key -> cf -> cassmutation

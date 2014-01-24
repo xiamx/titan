@@ -7,9 +7,13 @@ import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.common.DistributedStoreManager;
 import com.thinkaurelius.titan.diskstorage.configuration.ConfigOption;
 import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeyColumnValueStoreManager;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreFeatures;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.*;
+
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Token;
 
@@ -136,9 +140,6 @@ public abstract class AbstractCassandraStoreManager extends DistributedStoreMana
     protected final String keySpaceName;
     protected final int replicationFactor;
 
-    private final CassandraTransaction.Consistency readConsistencyLevel;
-    private final CassandraTransaction.Consistency writeConsistencyLevel;
-
     // see description for THRIFT_FRAME_SIZE and THRIFT_MAX_MESSAGE_SIZE for details
     protected final int thriftFrameSize;
 
@@ -154,15 +155,8 @@ public abstract class AbstractCassandraStoreManager extends DistributedStoreMana
         super(config, PORT_DEFAULT);
 
         this.keySpaceName = config.get(CASSANDRA_KEYSPACE);
-
         this.replicationFactor = config.get(REPLICATION_FACTOR);
-
-        this.readConsistencyLevel = CassandraTransaction.Consistency.parse(config.get(CASSANDRA_READ_CONSISTENCY));
-
-        this.writeConsistencyLevel = CassandraTransaction.Consistency.parse(config.get(CASSANDRA_WRITE_CONSISTENCY));
-
         this.thriftFrameSize = config.get(CASSANDRA_THRIFT_FRAME_SIZE) * 1024 * 1024;
-
         this.compressionEnabled = config.get(STORAGE_COMPRESSION);
         this.compressionChunkSizeKB = config.get(STORAGE_COMPRESSION_SIZE);
         this.compressionClass = config.get(CASSANDRA_COMPRESSION_TYPE);
@@ -183,8 +177,8 @@ public abstract class AbstractCassandraStoreManager extends DistributedStoreMana
     public abstract IPartitioner<? extends Token<?>> getCassandraPartitioner() throws StorageException;
 
     @Override
-    public StoreTransaction beginTransaction(final StoreTxConfig config) {
-        return new CassandraTransaction(config, readConsistencyLevel, writeConsistencyLevel);
+    public StoreTransaction beginTransaction(final Configuration config) {
+        return new CassandraTransaction(config);
     }
 
     @Override
@@ -198,9 +192,12 @@ public abstract class AbstractCassandraStoreManager extends DistributedStoreMana
             features = new StoreFeatures();
             features.supportsBatchMutation = true;
             features.supportsTxIsolation = false;
-            features.supportsConsistentKeyOperations = true;
+            features.supportsStrongConsistency = true;
             features.supportsLocking = false;
             features.isDistributed = true;
+            features.supportsStrongConsistency = true;
+            features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration().set(CASSANDRA_READ_CONSISTENCY, "QUORUM").set(CASSANDRA_WRITE_CONSISTENCY, "QUORUM");
+            features.localStrongConsistencyConfig = features.strongConsistencyConfig;
 
             switch (getPartitioner()) {
                 case RANDOM:

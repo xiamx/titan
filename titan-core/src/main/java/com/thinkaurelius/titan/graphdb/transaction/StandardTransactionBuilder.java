@@ -6,6 +6,8 @@ import com.thinkaurelius.titan.core.TitanTransaction;
 import com.thinkaurelius.titan.core.TransactionBuilder;
 import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.configuration.ModifiableConfiguration;
+import com.thinkaurelius.titan.diskstorage.util.TimeUtility;
+import com.thinkaurelius.titan.diskstorage.util.TimestampProvider;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.graphdb.database.StandardTitanGraph;
 
@@ -120,6 +122,8 @@ public class StandardTransactionBuilder implements TransactionConfiguration, Tra
 
         if (null != timestamp)
             storageConfiguration.set(TIMESTAMP_OVERRIDE, getTimestamp());
+        else
+            storageConfiguration.set(TIMESTAMP_OVERRIDE, TimeUtility.INSTANCE.getApproxNSSinceEpoch());
 
         if (null != metricsPrefix)
             storageConfiguration.set(METRICS_PREFIX, metricsPrefix);

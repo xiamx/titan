@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
+import com.thinkaurelius.titan.diskstorage.util.TimeUtility;
+
 import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.METRICS_PREFIX;
 import static com.thinkaurelius.titan.graphdb.transaction.TransactionConfiguration.TIMESTAMP_OVERRIDE;
 
@@ -24,6 +26,8 @@ public abstract class AbstractStoreTransaction implements StoreTransaction {
         Long l = config.get(TIMESTAMP_OVERRIDE);
         if (null != l)
             ts = l;
+        else
+            ts = TimeUtility.INSTANCE.getApproxNSSinceEpoch();
     }
 
     @Override
