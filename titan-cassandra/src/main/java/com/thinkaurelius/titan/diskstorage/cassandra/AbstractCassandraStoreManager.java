@@ -196,7 +196,7 @@ public abstract class AbstractCassandraStoreManager extends DistributedStoreMana
             features.supportsLocking = false;
             features.isDistributed = true;
             features.supportsStrongConsistency = true;
-            features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration().set(CASSANDRA_READ_CONSISTENCY, "QUORUM").set(CASSANDRA_WRITE_CONSISTENCY, "QUORUM");
+            features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration().set(CASSANDRA_READ_CONSISTENCY, "QUORUM").set(CASSANDRA_WRITE_CONSISTENCY, "QUORUM").set(METRICS_PREFIX, GraphDatabaseConfiguration.METRICS_SYSTEM_PREFIX_DEFAULT);
             features.localStrongConsistencyConfig = features.strongConsistencyConfig;
 
             switch (getPartitioner()) {

@@ -127,6 +127,8 @@ public class StandardTransactionBuilder implements TransactionConfiguration, Tra
 
         if (null != metricsPrefix)
             storageConfiguration.set(METRICS_PREFIX, metricsPrefix);
+        else
+            storageConfiguration.set(METRICS_PREFIX, METRICS_PREFIX.getDefaultValue());
 
         TransactionConfiguration immutable = new ImmutableTxCfg(isReadOnly,
                 assignIDsImmediately, verifyExternalVertexExistence,
