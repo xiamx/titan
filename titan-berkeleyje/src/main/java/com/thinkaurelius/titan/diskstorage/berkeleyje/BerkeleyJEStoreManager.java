@@ -1,8 +1,19 @@
 package com.thinkaurelius.titan.diskstorage.berkeleyje;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
-import com.sleepycat.je.*;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.Transaction;
 import com.thinkaurelius.titan.diskstorage.PermanentStorageException;
 import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.common.LocalStoreManager;
@@ -10,17 +21,10 @@ import com.thinkaurelius.titan.diskstorage.configuration.ConfigOption;
 import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreFeatures;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTxConfig;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.KVMutation;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.OrderedKeyValueStoreManager;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.util.system.IOUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class BerkeleyJEStoreManager extends LocalStoreManager implements OrderedKeyValueStoreManager {
 
@@ -49,7 +53,9 @@ public class BerkeleyJEStoreManager extends LocalStoreManager implements Ordered
         features.supportsUnorderedScan = false;
         features.supportsBatchMutation = false;
         features.supportsTxIsolation = transactional;
-        features.supportsConsistentKeyOperations = true;
+        features.supportsStrongConsistency = true;
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
+        features.localStrongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
         features.supportsLocking = true;
         features.isKeyOrdered = true;
         features.isDistributed = false;
@@ -85,7 +91,7 @@ public class BerkeleyJEStoreManager extends LocalStoreManager implements Ordered
     }
 
     @Override
-    public BerkeleyJETx beginTransaction(final StoreTxConfig config) throws StorageException {
+    public BerkeleyJETx beginTransaction(final Configuration config) throws StorageException {
         try {
             Transaction tx = null;
             if (transactional) {

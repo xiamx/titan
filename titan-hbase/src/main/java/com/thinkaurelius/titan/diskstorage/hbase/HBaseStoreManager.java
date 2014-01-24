@@ -10,12 +10,14 @@ import com.thinkaurelius.titan.diskstorage.*;
 import com.thinkaurelius.titan.diskstorage.common.DistributedStoreManager;
 import com.thinkaurelius.titan.diskstorage.configuration.ConfigNamespace;
 import com.thinkaurelius.titan.diskstorage.configuration.ConfigOption;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
 import com.thinkaurelius.titan.diskstorage.util.ByteBufferUtil;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayBuffer;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.util.system.IOUtils;
 import com.thinkaurelius.titan.util.system.NetworkUtil;
+
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.io.hfile.Compression;
@@ -30,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.thinkaurelius.titan.diskstorage.Backend.*;
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.METRICS_PREFIX;
 import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.STORAGE_NS;
 
 /**
@@ -145,7 +148,9 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
         features.supportsBatchMutation = true;
         features.supportsTxIsolation = false;
         features.supportsMultiQuery = true;
-        features.supportsConsistentKeyOperations = true;
+        features.supportsStrongConsistency = true;
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration().set(METRICS_PREFIX, GraphDatabaseConfiguration.METRICS_SYSTEM_PREFIX_DEFAULT);
+        features.localStrongConsistencyConfig = features.strongConsistencyConfig;
         features.supportsLocking = false;
         features.isKeyOrdered = true;
         features.isDistributed = true;
@@ -351,7 +356,7 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
     }
 
     @Override
-    public StoreTransaction beginTransaction(final StoreTxConfig config) throws StorageException {
+    public StoreTransaction beginTransaction(final Configuration config) throws StorageException {
         return new HBaseTransaction(config);
     }
 

@@ -7,8 +7,8 @@ import com.sleepycat.je.Transaction;
 import com.thinkaurelius.titan.diskstorage.PermanentStorageException;
 import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.common.AbstractStoreTransaction;
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.ConsistencyLevel;
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTxConfig;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class BerkeleyJETx extends AbstractStoreTransaction {
     private Transaction tx;
     private List<Cursor> openCursors = new ArrayList<Cursor>();
 
-    public BerkeleyJETx(Transaction t, StoreTxConfig config) {
+    public BerkeleyJETx(Transaction t, Configuration config) {
         super(config);
         tx = t;
     }

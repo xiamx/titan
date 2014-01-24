@@ -1,5 +1,7 @@
 package com.thinkaurelius.titan.diskstorage.persistit;
 
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.METRICS_PREFIX;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +85,7 @@ public class PersistitStoreManager extends LocalStoreManager implements OrderedK
             return stores.get(name);
         }
 
-        PersistitTransaction tx = new PersistitTransaction(db, new StoreTxConfig());
+        PersistitTransaction tx = new PersistitTransaction(db);
         PersistitKeyValueStore store = new PersistitKeyValueStore(name, this, db);
         tx.commit();
         stores.put(name, store);
@@ -122,7 +124,7 @@ public class PersistitStoreManager extends LocalStoreManager implements OrderedK
      * @return New Transaction Handle
      */
     @Override
-    public PersistitTransaction beginTransaction(final StoreTxConfig config) throws StorageException {
+    public PersistitTransaction beginTransaction(final Configuration config) throws StorageException {
         //all Exchanges created by a thread share the same transaction context
         return new PersistitTransaction(db, config);
     }
@@ -177,7 +179,9 @@ public class PersistitStoreManager extends LocalStoreManager implements OrderedK
         features.supportsOrderedScan = true;
         features.supportsUnorderedScan = false;
         features.supportsBatchMutation = false;
-        features.supportsConsistentKeyOperations = true;
+        features.supportsStrongConsistency = true;
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration().set(METRICS_PREFIX, GraphDatabaseConfiguration.METRICS_SYSTEM_PREFIX_DEFAULT);
+        features.localStrongConsistencyConfig = features.strongConsistencyConfig;
         features.supportsLocking = true;
         features.isKeyOrdered = true;
         features.hasLocalKeyPartition = false;
