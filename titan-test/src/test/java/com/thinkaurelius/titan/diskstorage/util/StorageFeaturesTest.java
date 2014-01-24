@@ -1,6 +1,8 @@
 package com.thinkaurelius.titan.diskstorage.util;
 
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreFeatures;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -34,11 +36,13 @@ public class StorageFeaturesTest {
         features.supportsBatchMutation = true;
         features.supportsTxIsolation = false;
         features.supportsMultiQuery = false;
-        features.supportsConsistentKeyOperations = true;
+        features.supportsStrongConsistency = true;
         features.supportsLocking = false;
         features.isKeyOrdered = false;
         features.isDistributed = true;
         features.hasLocalKeyPartition = false;
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
+        features.localStrongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
         assertNotNull(features);
         assertFalse(features.supportsScan());
         assertFalse(features.supportsTxIsolation());

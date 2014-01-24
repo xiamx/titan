@@ -9,6 +9,7 @@ import com.thinkaurelius.titan.core.TitanException;
 import com.thinkaurelius.titan.diskstorage.Entry;
 import com.thinkaurelius.titan.diskstorage.StaticBuffer;
 import com.thinkaurelius.titan.diskstorage.StorageException;
+import com.thinkaurelius.titan.diskstorage.configuration.ModifiableConfiguration;
 import com.thinkaurelius.titan.diskstorage.configuration.ReadConfiguration;
 import com.thinkaurelius.titan.diskstorage.configuration.WriteConfiguration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
@@ -18,15 +19,19 @@ import com.thinkaurelius.titan.diskstorage.util.StaticArrayBuffer;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntry;
 import com.thinkaurelius.titan.graphdb.database.serialize.DataOutput;
 import com.thinkaurelius.titan.graphdb.database.serialize.kryo.KryoSerializer;
+
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.buildConfiguration;
 
 /**
  * @author Matthias Broecheler (me@matthiasb.com)
@@ -77,7 +82,8 @@ public class KCVSConfiguration implements WriteConfiguration {
             public StaticBuffer call() throws Exception {
                 StoreTransaction txh = null;
                 try {
-                    txh = manager.beginTransaction(new StoreTxConfig(ConsistencyLevel.KEY_CONSISTENT));
+                    ModifiableConfiguration txc = buildConfiguration();
+                    txh = manager.beginTransaction(txc);
                     List<Entry> entries = store.getSlice(query,txh);
                     if (entries.isEmpty()) return null;
                     return entries.get(0).getValueAs(StaticBuffer.STATIC_FACTORY);
@@ -114,7 +120,8 @@ public class KCVSConfiguration implements WriteConfiguration {
             public Boolean call() throws Exception {
                 StoreTransaction txh = null;
                 try {
-                    txh = manager.beginTransaction(new StoreTxConfig(ConsistencyLevel.KEY_CONSISTENT));
+                    ModifiableConfiguration txc = buildConfiguration();
+                    txh = manager.beginTransaction(txc);
                     store.mutate(rowKey, additions, KeyColumnValueStore.NO_DELETIONS, txh);
                     return true;
                 } finally {
@@ -140,7 +147,8 @@ public class KCVSConfiguration implements WriteConfiguration {
                 public Boolean call() throws Exception {
                     StoreTransaction txh = null;
                     try {
-                        txh = manager.beginTransaction(new StoreTxConfig(ConsistencyLevel.KEY_CONSISTENT));
+                        ModifiableConfiguration txc = buildConfiguration();
+                        txh = manager.beginTransaction(txc);
                         store.mutate(rowKey, KeyColumnValueStore.NO_ADDITIONS, deletions, txh);
                         return true;
                     } finally {
@@ -168,7 +176,8 @@ public class KCVSConfiguration implements WriteConfiguration {
             public List<Entry> call() throws Exception {
                 StoreTransaction txh=null;
                 try {
-                    txh= manager.beginTransaction(new StoreTxConfig(ConsistencyLevel.KEY_CONSISTENT));
+                    ModifiableConfiguration txc = buildConfiguration();
+                    txh = manager.beginTransaction(txc);
                     return store.getSlice(new KeySliceQuery(rowKey,ByteBufferUtil.zeroBuffer(128),ByteBufferUtil.oneBuffer(128)),txh);
                 } finally {
                     if (txh!=null) txh.commit();

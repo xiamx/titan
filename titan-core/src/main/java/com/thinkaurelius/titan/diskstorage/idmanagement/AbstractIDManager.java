@@ -29,14 +29,18 @@ public abstract class AbstractIDManager implements IDAuthority {
     protected final long idApplicationWaitMS;
     protected final int idApplicationRetryCount;
 
+    protected final Configuration config;
+
     protected final byte[] rid;
-    
+
     protected final String metricsPrefix;
 
     private IDBlockSizer blockSizer;
     private volatile boolean isActive;
 
     public AbstractIDManager(Configuration config) {
+        this.config = config;
+
         this.rid = DistributedStoreManager.getRid(config);
 
         this.isActive = false;

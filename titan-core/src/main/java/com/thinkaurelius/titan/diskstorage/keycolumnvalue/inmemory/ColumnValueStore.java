@@ -1,14 +1,15 @@
 package com.thinkaurelius.titan.diskstorage.keycolumnvalue.inmemory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.thinkaurelius.titan.diskstorage.Entry;
 import com.thinkaurelius.titan.diskstorage.EntryList;
 import com.thinkaurelius.titan.diskstorage.StaticBuffer;
+import com.thinkaurelius.titan.diskstorage.configuration.ConfigOption;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
-import com.thinkaurelius.titan.diskstorage.util.ByteBufferUtil;
 import com.thinkaurelius.titan.diskstorage.util.NoLock;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntry;
+
+import static com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration.STORAGE_NS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,7 +173,7 @@ class ColumnValueStore {
     private ReentrantLock lock = null;
 
     private Lock getLock(StoreTransaction txh) {
-        if (txh.getConfiguration().getConsistency().isKeyConsistent()) {
+        if (txh.getConfiguration().get(SERIALIZE_OPS)) {
             if (lock == null) {
                 synchronized (this) {
                     if (lock == null) {
@@ -217,5 +218,5 @@ class ColumnValueStore {
 
     }
 
-
+    public static final ConfigOption<Boolean> SERIALIZE_OPS = new ConfigOption<Boolean>(STORAGE_NS, "serialize-ops", "Whether to force all backend operations across all transactions to execute serially", ConfigOption.Type.FIXED, false);
 }

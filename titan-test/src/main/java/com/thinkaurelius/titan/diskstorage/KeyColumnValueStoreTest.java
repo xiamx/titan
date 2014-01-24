@@ -18,6 +18,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.testcategory.OrderedKeyStoreTests;
 import com.thinkaurelius.titan.testcategory.UnorderedKeyStoreTests;
 import com.thinkaurelius.titan.testutil.RandomGenerator;
@@ -53,7 +54,7 @@ public abstract class KeyColumnValueStoreTest {
     }
 
     public StoreTransaction startTx() throws StorageException {
-        return manager.beginTransaction(new StoreTxConfig());
+        return manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration());
     }
 
     public StoreFeatures storeFeatures() {

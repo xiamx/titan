@@ -48,7 +48,19 @@ public class VertexIDAssignerTest {
     public VertexIDAssignerTest(boolean partition, int partitionMax, int[] localPartition) {
         MockIDAuthority idAuthority = new MockIDAuthority(11, partitionMax);
 
-        StoreFeatures features = StoreFeatures.defaultFeature(false);
+        StoreFeatures features = new StoreFeatures();
+        features.hasLocalKeyPartition = false;
+        features.isDistributed = false;
+        features.isKeyOrdered = false;
+        features.localStrongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
+        features.supportsBatchMutation = false;
+        features.supportsLocking = false;
+        features.supportsMultiQuery = false;
+        features.supportsOrderedScan = false;
+        features.supportsStrongConsistency = false;
+        features.supportsTxIsolation = false;
+        features.supportsUnorderedScan = false;
         if (localPartition != null) {
             features.hasLocalKeyPartition = true;
             idAuthority.setLocalPartition(localPartition);

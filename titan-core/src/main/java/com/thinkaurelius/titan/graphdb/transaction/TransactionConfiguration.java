@@ -1,6 +1,10 @@
 package com.thinkaurelius.titan.graphdb.transaction;
 
+import com.google.common.base.Predicate;
 import com.thinkaurelius.titan.core.DefaultTypeMaker;
+import com.thinkaurelius.titan.diskstorage.configuration.ConfigOption;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 /**
  * Provides configuration options for {@link com.thinkaurelius.titan.core.TitanTransaction}.
@@ -128,4 +132,22 @@ public interface TransactionConfiguration {
      * @return metrics name prefix string or null
      */
     public String getMetricsPrefix();
+
+    /**
+     * Returns the storage backend configuration for this transaction.
+     *
+     * The return value may be null.
+     */
+    public Configuration getStorageConfiguration();
+
+    public ConfigOption<Long> TIMESTAMP_OVERRIDE = new ConfigOption<Long>(
+            GraphDatabaseConfiguration.TITAN_NS, "timestamp",
+            "TODO" /* TODO */, ConfigOption.Type.MASKABLE, Long.class, null, new Predicate<Long>() {
+
+                @Override
+                public boolean apply(Long input) {
+                    return true;
+                }
+
+            });
 }

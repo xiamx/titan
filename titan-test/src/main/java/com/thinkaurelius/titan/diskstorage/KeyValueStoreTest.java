@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thinkaurelius.titan.diskstorage.keycolumnvalue.ConsistencyLevel;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.KVUtil;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.KeySelector;
@@ -22,6 +21,7 @@ import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.KeyValueEntry
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.OrderedKeyValueStore;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.keyvalue.OrderedKeyValueStoreManager;
 import com.thinkaurelius.titan.diskstorage.util.RecordIterator;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 public abstract class KeyValueStoreTest {
 
@@ -44,7 +44,7 @@ public abstract class KeyValueStoreTest {
     public void open() throws StorageException {
         manager = openStorageManager();
         store = manager.openDatabase(storeName);
-        tx = manager.beginTransaction(new StoreTxConfig());
+        tx = manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration());
     }
 
     public abstract OrderedKeyValueStoreManager openStorageManager() throws StorageException;
@@ -186,7 +186,7 @@ public abstract class KeyValueStoreTest {
             Assert.assertEquals(numKeys, KeyValueStoreUtil.count(iterator2));
         }
     }
-    
+
     private RecordIterator<KeyValueEntry> getAllData(StoreTransaction tx) throws StorageException {
         return store.getSlice(BackendTransaction.EDGESTORE_MIN_KEY, BackendTransaction.EDGESTORE_MAX_KEY, KeySelector.SelectAll, tx);
     }
@@ -237,4 +237,3 @@ public abstract class KeyValueStoreTest {
 
 
 }
- 

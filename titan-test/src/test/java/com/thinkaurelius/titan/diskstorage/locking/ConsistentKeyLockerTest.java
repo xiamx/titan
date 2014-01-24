@@ -5,6 +5,7 @@ import static com.thinkaurelius.titan.diskstorage.locking.consistentkey.Consiste
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.anyLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,6 +31,7 @@ import com.thinkaurelius.titan.diskstorage.PermanentStorageException;
 import com.thinkaurelius.titan.diskstorage.StaticBuffer;
 import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.TemporaryStorageException;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeyColumnValueStore;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeySliceQuery;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreTransaction;
@@ -44,6 +46,7 @@ import com.thinkaurelius.titan.diskstorage.util.StaticArrayBuffer;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntry;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntryList;
 import com.thinkaurelius.titan.diskstorage.util.TimestampProvider;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 
 public class ConsistentKeyLockerTest {
@@ -90,9 +93,16 @@ public class ConsistentKeyLockerTest {
          */
         relaxedCtrl = EasyMock.createControl();
         defaultTx = relaxedCtrl.createMock(StoreTransaction.class);
-        expect(defaultTx.getConfiguration()).andReturn(new StoreTxConfig()).anyTimes();
+        Configuration emptyStoreConfig = GraphDatabaseConfiguration.buildConfiguration();
+        expect(defaultTx.getConfiguration()).andReturn(emptyStoreConfig).anyTimes();
+        expect(defaultTx.getMetricsPrefix()).andReturn("default").anyTimes();
+        defaultTx.setTimestamp(anyLong());
+        expectLastCall().anyTimes();
         otherTx = relaxedCtrl.createMock(StoreTransaction.class);
-        expect(otherTx.getConfiguration()).andReturn(new StoreTxConfig()).anyTimes();
+        expect(otherTx.getConfiguration()).andReturn(emptyStoreConfig).anyTimes();
+        expect(otherTx.getMetricsPrefix()).andReturn("other").anyTimes();
+        otherTx.setTimestamp(anyLong());
+        expectLastCall().anyTimes();
         relaxedCtrl.replay();
 
         /*

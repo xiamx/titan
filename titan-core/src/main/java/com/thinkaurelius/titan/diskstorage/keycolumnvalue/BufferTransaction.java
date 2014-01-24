@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import com.thinkaurelius.titan.diskstorage.Entry;
 import com.thinkaurelius.titan.diskstorage.StaticBuffer;
 import com.thinkaurelius.titan.diskstorage.StorageException;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.util.BackendOperation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +132,22 @@ public class BufferTransaction implements StoreTransaction {
     }
 
     @Override
-    public StoreTxConfig getConfiguration() {
+    public Configuration getConfiguration() {
         return tx.getConfiguration();
+    }
+
+    @Override
+    public void setTimestamp(long ts) {
+        tx.setTimestamp(ts);
+    }
+
+    @Override
+    public long getTimestamp() {
+        return tx.getTimestamp();
+    }
+
+    @Override
+    public String getMetricsPrefix() {
+        return tx.getMetricsPrefix();
     }
 }

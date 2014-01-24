@@ -128,6 +128,14 @@ public class StandardTitanGraph extends TitanBlueprintsGraph {
         return buildTransaction().threadBound().start();
     }
 
+    /**
+     * Create a new immutable TransactionConfiguration which copies settings
+     * from the provided {@code configuration} and return a transaction which
+     * uses it.
+     *
+     * @param configuration The configuration to deep-copy
+     * @return A new transaction with a copy of the supplied configuration
+     */
     public StandardTitanTx newTransaction(TransactionConfiguration configuration) {
         if (!isOpen) ExceptionFactory.graphShutdown();
         try {

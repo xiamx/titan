@@ -86,7 +86,7 @@ public class IndexSerializer {
                         :new Parameter[0]);
     }
 
-    public IndexInfoRetriever getIndexInforRetriever() {
+    public IndexInfoRetriever getIndexInforRetriever() { // TODO typo
         return new IndexInfoRetriever();
     }
 

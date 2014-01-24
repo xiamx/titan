@@ -3,6 +3,7 @@ package com.thinkaurelius.titan.diskstorage;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntry;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 import com.thinkaurelius.titan.testcategory.PerformanceTests;
 
 import org.junit.After;
@@ -50,7 +51,7 @@ public abstract class KeyColumnValueStorePerformance {
     }
 
     public StoreTransaction startTx() throws StorageException {
-        return manager.beginTransaction(new StoreTxConfig());
+        return manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration());
     }
 
     public void clopen() throws StorageException {

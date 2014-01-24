@@ -210,7 +210,7 @@ public abstract class DistributedStoreManager extends AbstractStoreManager {
      * @return
      */
     protected Timestamp getTimestamp(StoreTransaction txh) {
-        long time = txh.getConfiguration().getTimestamp();
+        long time = txh.getTimestamp();
         time = time & 0xFFFFFFFFFFFFFFFEL; //remove last bit
         return new Timestamp(time | 1L, time);
     }

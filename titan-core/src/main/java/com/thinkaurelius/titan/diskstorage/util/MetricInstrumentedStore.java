@@ -86,7 +86,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
 
     @Override
     public boolean containsKey(final StaticBuffer key, final StoreTransaction txh) throws StorageException {
-        return runWithMetrics(txh.getConfiguration().getMetricsPrefix(), metricsStoreName, M_CONTAINS_KEY,
+        return runWithMetrics(txh.getMetricsPrefix(), metricsStoreName, M_CONTAINS_KEY,
             new StorageCallable<Boolean>() {
                 public Boolean call() throws StorageException {
                     return Boolean.valueOf(backend.containsKey(key, txh));
@@ -97,7 +97,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
 
     @Override
     public EntryList getSlice(final KeySliceQuery query, final StoreTransaction txh) throws StorageException {
-        final String p = txh.getConfiguration().getMetricsPrefix();
+        final String p = txh.getMetricsPrefix();
         return runWithMetrics(p, metricsStoreName, M_GET_SLICE,
             new StorageCallable<EntryList>() {
                 public EntryList call() throws StorageException {
@@ -113,12 +113,12 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
     public Map<StaticBuffer,EntryList> getSlice(final List<StaticBuffer> keys,
                                       final SliceQuery query,
                                       final StoreTransaction txh) throws StorageException {
-        final String p = txh.getConfiguration().getMetricsPrefix();
+        final String p = txh.getMetricsPrefix();
         return runWithMetrics(p, metricsStoreName, M_GET_SLICE,
             new StorageCallable<Map<StaticBuffer,EntryList>>() {
                 public Map<StaticBuffer,EntryList> call() throws StorageException {
                     Map<StaticBuffer,EntryList> results = backend.getSlice(keys, query, txh);
-    
+
                     for (EntryList result : results.values()) {
                         recordSliceMetrics(p, result);
                     }
@@ -133,7 +133,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
                        final List<Entry> additions,
                        final List<StaticBuffer> deletions,
                        final StoreTransaction txh) throws StorageException {
-        runWithMetrics(txh.getConfiguration().getMetricsPrefix(), metricsStoreName, M_MUTATE,
+        runWithMetrics(txh.getMetricsPrefix(), metricsStoreName, M_MUTATE,
                 new StorageCallable<Void>() {
                     public Void call() throws StorageException {
                         backend.mutate(key, additions, deletions, txh);
@@ -148,7 +148,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
                             final StaticBuffer column,
                             final StaticBuffer expectedValue,
                             final StoreTransaction txh) throws StorageException {
-        runWithMetrics(txh.getConfiguration().getMetricsPrefix(), metricsStoreName, M_ACQUIRE_LOCK,
+        runWithMetrics(txh.getMetricsPrefix(), metricsStoreName, M_ACQUIRE_LOCK,
             new StorageCallable<Void>() {
                 public Void call() throws StorageException {
                     backend.acquireLock(key, column, expectedValue, txh);
@@ -160,7 +160,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
 
     @Override
     public KeyIterator getKeys(final KeyRangeQuery query, final StoreTransaction txh) throws StorageException {
-        final String p = txh.getConfiguration().getMetricsPrefix();
+        final String p = txh.getMetricsPrefix();
         return runWithMetrics(p, metricsStoreName, M_GET_KEYS,
             new StorageCallable<KeyIterator>() {
                 public KeyIterator call() throws StorageException {
@@ -177,7 +177,7 @@ public class MetricInstrumentedStore implements KeyColumnValueStore {
 
     @Override
     public KeyIterator getKeys(final SliceQuery query, final StoreTransaction txh) throws StorageException {
-        final String p = txh.getConfiguration().getMetricsPrefix();
+        final String p = txh.getMetricsPrefix();
         return runWithMetrics(p, metricsStoreName, M_GET_KEYS,
             new StorageCallable<KeyIterator>() {
                 public KeyIterator call() throws StorageException {

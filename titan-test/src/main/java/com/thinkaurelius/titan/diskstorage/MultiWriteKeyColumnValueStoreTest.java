@@ -8,6 +8,8 @@ import com.thinkaurelius.titan.diskstorage.util.StaticArrayBuffer;
 import static com.thinkaurelius.titan.diskstorage.keycolumnvalue.KeyColumnValueStore.*;
 
 import com.thinkaurelius.titan.diskstorage.util.StaticArrayEntry;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +56,7 @@ public abstract class MultiWriteKeyColumnValueStoreTest {
     public void open() throws StorageException {
         manager = openStorageManager();
         Assert.assertTrue(manager.getFeatures().supportsBatchMutation());
-        tx = new BufferTransaction(manager.beginTransaction(new StoreTxConfig()), manager, bufferSize, 1, 0);
+        tx = new BufferTransaction(manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration()), manager, bufferSize, 1, 0);
         store1 = new BufferedKeyColumnValueStore(manager.openDatabase(storeName1), true);
         store2 = new BufferedKeyColumnValueStore(manager.openDatabase(storeName2), true);
 
@@ -74,7 +76,7 @@ public abstract class MultiWriteKeyColumnValueStoreTest {
 
     public void newTx() throws StorageException {
         if (tx!=null) tx.commit();
-        tx = new BufferTransaction(manager.beginTransaction(new StoreTxConfig()), manager, bufferSize, 1, 0);
+        tx = new BufferTransaction(manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration()), manager, bufferSize, 1, 0);
     }
 
     @Test
@@ -143,7 +145,7 @@ public abstract class MultiWriteKeyColumnValueStoreTest {
         final StaticBuffer col = KeyColumnValueStoreUtil.longToByteBuffer(arbitraryLong);
         final StaticBuffer nextCol = KeyColumnValueStoreUtil.longToByteBuffer(arbitraryLong + 1);
 
-        final StoreTransaction directTx = manager.beginTransaction(new StoreTxConfig());
+        final StoreTransaction directTx = manager.beginTransaction(GraphDatabaseConfiguration.buildConfiguration());
 
         KCVMutation km = new KCVMutation(
                 ImmutableList.<Entry>of(StaticArrayEntry.of(col, val)),

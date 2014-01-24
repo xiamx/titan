@@ -5,11 +5,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.thinkaurelius.titan.diskstorage.*;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
 import com.thinkaurelius.titan.diskstorage.locking.LocalLockMediator;
 import com.thinkaurelius.titan.diskstorage.locking.PermanentLockingException;
 import com.thinkaurelius.titan.diskstorage.util.ByteBufferUtil;
 import com.thinkaurelius.titan.diskstorage.util.KeyColumn;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +43,14 @@ public class ExpectedValueCheckingTransaction implements StoreTransaction {
     private final StoreTransaction baseTx;
     private final StoreTransaction consistentTx;
     private final int retryCount;
+    private long ts;
 
     private final Map<ExpectedValueCheckingStore, Map<KeyColumn, StaticBuffer>> expectedValuesByStore =
             new HashMap<ExpectedValueCheckingStore, Map<KeyColumn, StaticBuffer>>();
 
     public ExpectedValueCheckingTransaction(StoreTransaction baseTx, StoreTransaction consistentTx, int retryCount) {
-        Preconditions.checkArgument(consistentTx.getConfiguration().getConsistency() == ConsistencyLevel.KEY_CONSISTENT);
+        // TODO move this
+//        Preconditions.checkArgument(consistentTx.getConfiguration().getConsistency() == ConsistencyLevel.KEY_CONSISTENT);
         this.baseTx = baseTx;
         this.consistentTx = consistentTx;
         this.retryCount = retryCount;
@@ -204,7 +208,21 @@ public class ExpectedValueCheckingTransaction implements StoreTransaction {
     }
 
     @Override
-    public StoreTxConfig getConfiguration() {
+    public Configuration getConfiguration() {
         return baseTx.getConfiguration();
+    }
+
+    @Override
+    public void setTimestamp(long ts) {
+        this.ts = ts;
+    }
+
+    public long getTimestamp() {
+        return ts;
+    }
+
+    @Override
+    public String getMetricsPrefix() {
+        return baseTx.getMetricsPrefix();
     }
 }

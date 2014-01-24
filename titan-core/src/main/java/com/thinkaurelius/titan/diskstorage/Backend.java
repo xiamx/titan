@@ -25,6 +25,7 @@ import com.thinkaurelius.titan.graphdb.configuration.TitanConstants;
 import com.thinkaurelius.titan.graphdb.database.indexing.StandardIndexInformation;
 import com.thinkaurelius.titan.graphdb.transaction.TransactionConfiguration;
 import com.thinkaurelius.titan.util.system.ConfigurationUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,7 @@ public class Backend {
         if (!storeFeatures.supportsLocking()) {
             if (storeFeatures.supportsTxIsolation()) {
                 store = new TransactionalLockStore(store);
-            } else if (storeFeatures.supportsConsistentKeyOperations()) {
+            } else if (storeFeatures.supportsStrongConsistency()) {
                 if (lockEnabled) {
                     final String lockerName = store.getName() + LOCK_STORE_SUFFIX;
                     store = new ExpectedValueCheckingStore(store, getLocker(lockerName));
@@ -225,7 +226,7 @@ public class Backend {
                 idStore = new MetricInstrumentedStore(idStore, getMetricsStoreName("idStore"));
             }
             idAuthority = null;
-            if (storeFeatures.supportsConsistentKeyOperations()) {
+            if (storeFeatures.supportsStrongConsistency()) {
                 idAuthority = new ConsistentKeyIDManager(idStore, storeManager, config);
             } else {
                 throw new IllegalStateException("Store needs to support consistent key or transactional operations for ID manager to guarantee proper id allocations");
@@ -356,23 +357,27 @@ public class Backend {
      * @throws StorageException
      */
     public BackendTransaction beginTransaction(TransactionConfiguration configuration, KeyInformation.Retriever indexKeyRetriever) throws StorageException {
-        StoreTxConfig txConfig = new StoreTxConfig(configuration.getMetricsPrefix());
-        if (configuration.hasTimestamp()) txConfig.setTimestamp(configuration.getTimestamp());
-        StoreTransaction tx = storeManager.beginTransaction(txConfig);
+//        StoreTxConfig txConfig = new StoreTxConfig(configuration.getMetricsPrefix());
+//        if (configuration.hasTimestamp()) txConfig.setTimestamp(configuration.getTimestamp());
+//        StoreTransaction tx = storeManager.beginTransaction(txConfig);
+        StoreTransaction tx = storeManager.beginTransaction(configuration.getStorageConfiguration());
+
+        // Use ExpectedValueCheckingTransaction?
+        final boolean evcEnabled =
+            !storeFeatures.supportsLocking() &&
+            !storeFeatures.supportsTxIsolation() &&
+             storeFeatures.supportsStrongConsistency();
+
+        // Wrap with buffer
         if (bufferSize > 1) {
             Preconditions.checkArgument(storeManager.getFeatures().supportsBatchMutation());
             tx = new BufferTransaction(tx, storeManager, bufferSize, writeAttempts, persistAttemptWaittime);
         }
-        if (!storeFeatures.supportsLocking()) {
-            if (storeFeatures.supportsTxIsolation()) {
-                //No transaction wrapping needed
-            } else if (storeFeatures.supportsConsistentKeyOperations()) {
-                txConfig = new StoreTxConfig(ConsistencyLevel.KEY_CONSISTENT, configuration.getMetricsPrefix());
-                if (configuration.hasTimestamp()) txConfig.setTimestamp(configuration.getTimestamp());
-                tx = new ExpectedValueCheckingTransaction(tx,
-                        storeManager.beginTransaction(txConfig),
-                        readAttempts);
-            }
+
+        if (evcEnabled) {
+            // Wrap with expected value checker
+            StoreTransaction consistentTx = storeManager.beginTransaction(storeFeatures.getStrongConsistencyTxConfig());
+            tx = new ExpectedValueCheckingTransaction(tx, consistentTx, readAttempts);
         }
 
         //Index transactions

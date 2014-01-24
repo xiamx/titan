@@ -3,6 +3,8 @@ package com.thinkaurelius.titan.diskstorage.keycolumnvalue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
+
 /**
  * Specifies the features that a given store supports
  * <p/>
@@ -18,12 +20,15 @@ public class StoreFeatures {
     public Boolean supportsMultiQuery;
 
     public Boolean supportsTxIsolation;
-    public Boolean supportsConsistentKeyOperations;
+    public Boolean supportsStrongConsistency;
     public Boolean supportsLocking;
 
     public Boolean isKeyOrdered;
     public Boolean isDistributed;
     public Boolean hasLocalKeyPartition;
+
+    public Configuration strongConsistencyConfig;
+    public Configuration localStrongConsistencyConfig;
 
     private boolean verify() {
         for (Field f : getClass().getDeclaredFields()) {
@@ -117,14 +122,19 @@ public class StoreFeatures {
         return supportsTxIsolation;
     }
 
-    /**
-     * Whether this store supports consistent atomic operations on keys.
-     *
-     * @return
-     */
-    public boolean supportsConsistentKeyOperations() {
+    public boolean supportsStrongConsistency() {
         assert verify();
-        return supportsConsistentKeyOperations;
+        return supportsStrongConsistency;
+    }
+
+    public Configuration getStrongConsistencyTxConfig() {
+        assert verify();
+        return strongConsistencyConfig;
+    }
+
+    public Configuration getLocalStrongConsistencyTxConfig() {
+        assert verify();
+        return localStrongConsistencyConfig;
     }
 
     /**

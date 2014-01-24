@@ -486,7 +486,7 @@ public class ConsistentKeyLocker extends AbstractLocker<ConsistentKeyLockStatus>
     }
 
     private static StoreTransaction overrideTimestamp(final StoreTransaction tx, final long nanoTimestamp) {
-        tx.getConfiguration().setTimestamp(nanoTimestamp);
+        tx.setTimestamp(nanoTimestamp);
         return tx;
     }
 

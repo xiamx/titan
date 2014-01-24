@@ -42,6 +42,7 @@ public class ConsistentKeyIDManager extends AbstractIDManager implements Backend
 
     private final StoreManager manager;
     private final KeyColumnValueStore idStore;
+    private final Configuration storeConfig;
 
     private final int rollbackAttempts = 5;
     private final int rollbackWaitTime = 200;
@@ -50,15 +51,14 @@ public class ConsistentKeyIDManager extends AbstractIDManager implements Backend
     private final int uniqueIDUpperBound;
     private final int uniqueId;
     private final boolean randomizeUniqueId;
-    private final ConsistencyLevel consistencLevel;
 
     private final Random random = new Random();
 
     public ConsistentKeyIDManager(KeyColumnValueStore idStore, StoreManager manager, Configuration config) throws StorageException {
         super(config);
-        Preconditions.checkArgument(manager.getFeatures().supportsConsistentKeyOperations());
-        this.manager = manager;
+        Preconditions.checkArgument(manager.getFeatures().supportsStrongConsistency());
         this.idStore = idStore;
+        this.manager = manager;
 
         uniqueIdBitWidth = config.get(IDAUTHORITY_UNIQUE_ID_BITS);
         uniqueIDUpperBound = 1<<uniqueIdBitWidth;
@@ -68,14 +68,22 @@ public class ConsistentKeyIDManager extends AbstractIDManager implements Backend
                     "Cannot use local consistency with randomization - this leads to data corruption");
             randomizeUniqueId = true;
             uniqueId = -1;
-            consistencLevel = ConsistencyLevel.KEY_CONSISTENT;
+//            consistencLevel = ConsistencyLevel.KEY_CONSISTENT;
+            storeConfig = manager.getFeatures().getStrongConsistencyTxConfig();
         } else {
             randomizeUniqueId = false;
+//            if (config.get(IDAUTHORITY_USE_LOCAL_CONSISTENCY)) {
+//                Preconditions.checkArgument(config.has(IDAUTHORITY_UNIQUE_ID),"Need to configure a unique id in order to use local consistency");
+//                consistencLevel = ConsistencyLevel.LOCAL_KEY_CONSISTENT;
+//            } else {
+//                consistencLevel = ConsistencyLevel.KEY_CONSISTENT;
+//            }
+
             if (config.get(IDAUTHORITY_USE_LOCAL_CONSISTENCY)) {
                 Preconditions.checkArgument(config.has(IDAUTHORITY_UNIQUE_ID),"Need to configure a unique id in order to use local consistency");
-                consistencLevel = ConsistencyLevel.LOCAL_KEY_CONSISTENT;
+                storeConfig = manager.getFeatures().getLocalStrongConsistencyTxConfig();
             } else {
-                consistencLevel = ConsistencyLevel.KEY_CONSISTENT;
+                storeConfig = manager.getFeatures().getStrongConsistencyTxConfig();
             }
             uniqueId = config.get(IDAUTHORITY_UNIQUE_ID);
             Preconditions.checkArgument(uniqueId>=0,"Invalid unique id: %s",uniqueId);
@@ -95,7 +103,7 @@ public class ConsistentKeyIDManager extends AbstractIDManager implements Backend
 
     @Override
     public StoreTransaction openTx() throws StorageException {
-        return manager.beginTransaction(new StoreTxConfig(consistencLevel, metricsPrefix));
+        return manager.beginTransaction(storeConfig);
     }
 
     private long getCurrentID(final StaticBuffer partitionKey) throws StorageException {
@@ -248,7 +256,7 @@ public class ConsistentKeyIDManager extends AbstractIDManager implements Backend
                                 }, new BackendOperation.TransactionalProvider() { //Use normal consistency level for these non-critical delete operations
                                     @Override
                                     public StoreTransaction openTx() throws StorageException {
-                                        return manager.beginTransaction(new StoreTxConfig(ConsistencyLevel.DEFAULT,metricsPrefix));
+                                        return manager.beginTransaction(storeConfig);
                                     }
                                 });
 

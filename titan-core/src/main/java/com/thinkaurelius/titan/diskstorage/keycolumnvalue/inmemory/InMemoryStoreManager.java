@@ -6,7 +6,7 @@ import com.thinkaurelius.titan.diskstorage.StorageException;
 import com.thinkaurelius.titan.diskstorage.common.AbstractStoreTransaction;
 import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 import com.thinkaurelius.titan.diskstorage.keycolumnvalue.*;
-import org.apache.commons.configuration.BaseConfiguration;
+import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +22,6 @@ public class InMemoryStoreManager implements KeyColumnValueStoreManager {
     private final ConcurrentHashMap<String, InMemoryKeyColumnValueStore> stores;
 
     private final StoreFeatures features;
-    private final Map<String, String> storeConfig;
 
     public InMemoryStoreManager() {
         this(Configuration.EMPTY);
@@ -31,14 +30,15 @@ public class InMemoryStoreManager implements KeyColumnValueStoreManager {
     public InMemoryStoreManager(final Configuration configuration) {
 
         stores = new ConcurrentHashMap<String, InMemoryKeyColumnValueStore>();
-        storeConfig = new ConcurrentHashMap<String, String>();
 
         features = new StoreFeatures();
         features.supportsOrderedScan = true;
         features.supportsUnorderedScan = true;
         features.supportsBatchMutation = false;
         features.supportsTxIsolation = false;
-        features.supportsConsistentKeyOperations = true;
+        features.supportsStrongConsistency = true;
+        features.strongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
+        features.localStrongConsistencyConfig = GraphDatabaseConfiguration.buildConfiguration();
         features.supportsLocking = false;
         features.isDistributed = false;
         features.supportsMultiQuery = false;
@@ -47,7 +47,7 @@ public class InMemoryStoreManager implements KeyColumnValueStoreManager {
     }
 
     @Override
-    public StoreTransaction beginTransaction(final StoreTxConfig config) throws StorageException {
+    public StoreTransaction beginTransaction(final Configuration config) throws StorageException {
         return new TransactionHandle(config);
     }
 
@@ -99,7 +99,7 @@ public class InMemoryStoreManager implements KeyColumnValueStoreManager {
 
     private class TransactionHandle extends AbstractStoreTransaction {
 
-        public TransactionHandle(final StoreTxConfig config) {
+        public TransactionHandle(final Configuration config) {
             super(config);
         }
     }

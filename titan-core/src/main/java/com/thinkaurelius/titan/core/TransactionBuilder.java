@@ -1,6 +1,8 @@
 package com.thinkaurelius.titan.core;
 
 import com.google.common.base.Preconditions;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
+import com.thinkaurelius.titan.diskstorage.keycolumnvalue.StoreManager;
 import com.thinkaurelius.titan.graphdb.configuration.GraphDatabaseConfiguration;
 
 /**
@@ -52,8 +54,8 @@ public interface TransactionBuilder {
      * @return
      */
     public TransactionBuilder setTimestamp(long timestamp);
-    
-    
+
+
     /**
      * Whether to enable Metrics for this transaction, and if so, what string
      * should start the transaction's metric names.
@@ -76,11 +78,11 @@ public interface TransactionBuilder {
      * <p>
      * The default value is
      * {@link GraphDatabaseConfiguration#METRICS_PREFIX_DEFAULT}.
-     * 
+     *
      * Sets the name prefix used for Metrics recorded by this transaction. If
      * metrics is enabled via {@link GraphDatabaseConfiguration#BASIC_METRICS},
      * this string will be prepended to all Titan metric names.
-     * 
+     *
      * @param prefix
      *            Metric name prefix for this transaction
      * @return

@@ -1,6 +1,7 @@
 package com.thinkaurelius.titan.diskstorage.keycolumnvalue;
 
 import com.thinkaurelius.titan.diskstorage.TransactionHandle;
+import com.thinkaurelius.titan.diskstorage.configuration.Configuration;
 
 /**
  * A transaction handle uniquely identifies a transaction on the storage backend.
@@ -21,7 +22,11 @@ public interface StoreTransaction extends TransactionHandle {
      *
      * @return
      */
-    public StoreTxConfig getConfiguration();
+    public Configuration getConfiguration();
 
+    public void setTimestamp(long ts);
 
+    public long getTimestamp();
+
+    public String getMetricsPrefix();
 }
