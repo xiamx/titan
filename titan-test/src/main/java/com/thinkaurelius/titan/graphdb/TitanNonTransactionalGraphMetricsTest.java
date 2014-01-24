@@ -314,7 +314,7 @@ public abstract class TitanNonTransactionalGraphMetricsTest extends TitanGraphBa
         for (String operation : OPERATION_NAMES) {
             Long count = operationCounts.get(operation);
             if (count==null) count = 0l;
-            assertEquals("On "+storeName+"-"+operation,count.longValue(), metric.getCounter(prefix, storeName, operation, MetricInstrumentedStore.M_CALLS).getCount());
+            assertEquals("On "+ prefix + "." + storeName+"-"+operation,count.longValue(), metric.getCounter(prefix, storeName, operation, MetricInstrumentedStore.M_CALLS).getCount());
         }
     }
 
