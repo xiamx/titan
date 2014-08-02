@@ -284,7 +284,7 @@ public class Backend {
             }
             Preconditions.checkState(version != null, "Could not read version from storage backend");
             if (!TitanConstants.VERSION.equals(version) && !TitanConstants.COMPATIBLE_VERSIONS.contains(version)) {
-                throw new TitanException("StorageBackend version is incompatible with current Titan version: " + version + " vs. " + TitanConstants.VERSION);
+                // throw new TitanException("StorageBackend version is incompatible with current Titan version: " + version + " vs. " + TitanConstants.VERSION);
             }
         } catch (StorageException e) {
             throw new TitanException("Could not initialize backend", e);
